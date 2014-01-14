@@ -12,6 +12,7 @@ DallasTemperature sensors(&oneWire);
 
 // arrays to hold device address
 DeviceAddress insideThermometer;
+DeviceAddress outsideThermometer;
 
 void setup(void)
 {
@@ -19,6 +20,10 @@ void setup(void)
   Serial.begin(9600);
   Serial.println("Dallas Temperature IC Control Library Demo");
 
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for Leonardo only
+  }
+  
   // locate devices on the bus
   Serial.print("Locating devices...");
   sensors.begin();
@@ -43,6 +48,7 @@ void setup(void)
   // use those addresses and manually assign them (see above) once you know 
   // the devices on your bus (and assuming they don't change).
   if (!sensors.getAddress(insideThermometer, 0)) Serial.println("Unable to find address for Device 0"); 
+  if (!sensors.getAddress(outsideThermometer, 1)) Serial.println("Unable to find address for Device 1"); 
   
   // method 2: search()
   // search() looks for the next device. Returns 1 if a new address has been
@@ -60,17 +66,26 @@ void setup(void)
   Serial.print("Device 0 Address: ");
   printAddress(insideThermometer);
   Serial.println();
+  
+  Serial.print("Device 1 Address: ");
+  printAddress(outsideThermometer);
+  Serial.println();
 
   // set the resolution to 9 bit (Each Dallas/Maxim device is capable of several different resolutions)
   sensors.setResolution(insideThermometer, 9);
+  sensors.setResolution(outsideThermometer, 9);
  
   Serial.print("Device 0 Resolution: ");
   Serial.print(sensors.getResolution(insideThermometer), DEC); 
   Serial.println();
+  
+  Serial.print("Device 1 Resolution: ");
+  Serial.print(sensors.getResolution(outsideThermometer), DEC); 
+  Serial.println();
 }
 
 // function to print the temperature for a device
-void printTemperature(DeviceAddress deviceAddress)
+void printTemperature(DeviceAddress deviceAddress, char *marker)
 {
   // method 1 - slower
   //Serial.print("Temp C: ");
@@ -80,6 +95,9 @@ void printTemperature(DeviceAddress deviceAddress)
 
   // method 2 - faster
   float tempC = sensors.getTempC(deviceAddress);
+  Serial.print("[");
+  Serial.print(marker);
+  Serial.print("] ");
   Serial.print("Temp C: ");
   Serial.print(tempC);
   Serial.print(" Temp F: ");
@@ -95,7 +113,8 @@ void loop(void)
   Serial.println("DONE");
   
   // It responds almost immediately. Let's print out the data
-  printTemperature(insideThermometer); // Use a simple function to print out the data
+  printTemperature(insideThermometer, "in"); // Use a simple function to print out the data
+  printTemperature(outsideThermometer, "out"); // Use a simple function to print out the data
 }
 
 // function to print a device address
