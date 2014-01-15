@@ -14,8 +14,16 @@ DallasTemperature sensors(&oneWire);
 DeviceAddress insideThermometer;
 DeviceAddress outsideThermometer;
 
+// Pin 13 has an LED connected on most Arduino boards.
+// give it a name:
+int internalLed = 13;
+int redLed = 3;
+
 void setup(void)
 {
+  pinMode(internalLed, OUTPUT);
+  pinMode(redLed, OUTPUT);
+  
   // start serial port
   Serial.begin(9600);
   Serial.println("Dallas Temperature IC Control Library Demo");
@@ -106,15 +114,20 @@ void printTemperature(DeviceAddress deviceAddress, char *marker)
 
 void loop(void)
 { 
+  delay(1000);
   // call sensors.requestTemperatures() to issue a global temperature 
   // request to all devices on the bus
   Serial.print("Requesting temperatures...");
+  //digitalWrite(internalLed, HIGH);
+  digitalWrite(redLed, HIGH);
   sensors.requestTemperatures(); // Send the command to get temperatures
   Serial.println("DONE");
   
   // It responds almost immediately. Let's print out the data
   printTemperature(insideThermometer, "in"); // Use a simple function to print out the data
   printTemperature(outsideThermometer, "out"); // Use a simple function to print out the data
+  //digitalWrite(internalLed, LOW);
+  digitalWrite(redLed, LOW);  
 }
 
 // function to print a device address
