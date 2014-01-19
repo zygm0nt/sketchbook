@@ -1,8 +1,9 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <LiquidCrystal.h>
 
 // Data wire is plugged into port 2 on the Arduino
-#define ONE_WIRE_BUS 2
+#define ONE_WIRE_BUS 9
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
@@ -14,13 +15,17 @@ DallasTemperature sensors(&oneWire);
 DeviceAddress insideThermometer;
 DeviceAddress outsideThermometer;
 
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
 int internalLed = 13;
-int redLed = 3;
+int redLed = 8;
 
 void setup(void)
 {
+  lcd.begin(24, 2);
+  
   pinMode(internalLed, OUTPUT);
   pinMode(redLed, OUTPUT);
   
@@ -93,15 +98,8 @@ void setup(void)
 }
 
 // function to print the temperature for a device
-void printTemperature(DeviceAddress deviceAddress, char *marker)
+float printTemperature(DeviceAddress deviceAddress, char *marker)
 {
-  // method 1 - slower
-  //Serial.print("Temp C: ");
-  //Serial.print(sensors.getTempC(deviceAddress));
-  //Serial.print(" Temp F: ");
-  //Serial.print(sensors.getTempF(deviceAddress)); // Makes a second call to getTempC and then converts to Fahrenheit
-
-  // method 2 - faster
   float tempC = sensors.getTempC(deviceAddress);
   Serial.print("[");
   Serial.print(marker);
@@ -110,6 +108,8 @@ void printTemperature(DeviceAddress deviceAddress, char *marker)
   Serial.print(tempC);
   Serial.print(" Temp F: ");
   Serial.println(DallasTemperature::toFahrenheit(tempC)); // Converts tempC to Fahrenheit
+  
+  return tempC;
 }
 
 void loop(void)
@@ -124,8 +124,10 @@ void loop(void)
   Serial.println("DONE");
   
   // It responds almost immediately. Let's print out the data
-  printTemperature(insideThermometer, "in"); // Use a simple function to print out the data
-  printTemperature(outsideThermometer, "out"); // Use a simple function to print out the data
+  float inC = printTemperature(insideThermometer, "in"); // Use a simple function to print out the data
+  float outC = printTemperature(outsideThermometer, "out"); // Use a simple function to print out the data
+  printToLcd(inC, outC);
+  //autoscroll();
   //digitalWrite(internalLed, LOW);
   digitalWrite(redLed, LOW);  
 }
@@ -138,4 +140,44 @@ void printAddress(DeviceAddress deviceAddress)
     if (deviceAddress[i] < 16) Serial.print("0");
     Serial.print(deviceAddress[i], HEX);
   }
+}
+
+void printToLcd(float inTemp, float outTemp) {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  
+  lcd.print("[in]: ");
+  lcd.print(inTemp);
+  
+  lcd.print(" [out]: ");
+  lcd.print(outTemp);
+  
+  lcd.setCursor(0, 1);
+  lcd.print("time: ");
+  lcd.print(millis());
+}
+
+void autoscroll() {
+  // set the cursor to (0,0):
+  lcd.setCursor(0, 0);
+  // print from 0 to 9:
+  for (int thisChar = 0; thisChar < 10; thisChar++) {
+   lcd.print(thisChar);
+   delay(500);
+  }
+
+  // set the cursor to (16,1):
+  lcd.setCursor(24,1);
+  // set the display to automatically scroll:
+  lcd.autoscroll();
+  // print from 0 to 9:
+  for (int thisChar = 0; thisChar < 10; thisChar++) {
+    lcd.print(thisChar);
+    delay(500);
+  }
+  // turn off automatic scrolling
+  lcd.noAutoscroll();
+  
+  // clear screen for the next loop:
+  lcd.clear();
 }
