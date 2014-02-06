@@ -4,3 +4,9 @@
 [submodule "libraries/ArduinoTemperatureControlLibrary"]
 	path = libraries/ArduinoTemperatureControlLibrary
 	url = https://github.com/milesburton/Arduino-Temperature-Control-Library
+[submodule "libraries/NewLiquidCrystal"]
+	path = libraries/NewLiquidCrystal
+	url = https://github.com/marcmerlin/NewLiquidCrystal
+[submodule "libraries/LiquidCrystalS2P"]
+	path = libraries/LiquidCrystalS2P
+	url = https://github.com/MatBenetti/LiquidCrystalS2P
